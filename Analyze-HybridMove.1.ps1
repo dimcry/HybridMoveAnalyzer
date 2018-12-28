@@ -1,6 +1,6 @@
 # MIT License
 # 
-# Copyright (c) 2019 Cristian Dimofte
+# Copyright (c) 2018 Cristian Dimofte
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -66,12 +66,15 @@ The logic:
 # Common space for functions, global variables #
 ################################################
 
-function Check-PathOrFile {
+Function Check-PathOrFile
+{
+    <#
+        .Synopsis
+        The role of this function is to collect the Path from where to Import a file, or, where to Export a file.
+    #>
     param (
-        # Full path of the .xml file
         [Parameter(Mandatory = $true)]
-        [string]
-        $PathToCheck
+        [String]$PathToCheck        
     )
 
     [bool]$ValidatePath = $True
@@ -81,21 +84,32 @@ function Check-PathOrFile {
         Write-Host "The following is an invalid path, or, we are not able to connect to it: " -ForegroundColor Red -NoNewline
         Write-Host " `"$PathToCheck`" " -ForegroundColor White -NoNewline
     }
-    
     return $ValidatePath
 }
 
-function Import-XMLInVariable {
+Function Mark-WhichLogs {
     param (
-        # .xml file to import
         [Parameter(Mandatory = $true)]
-        [string]
-        $FileToImport
+        [String]$PathToCheck
     )
 
-    $TheFile = Import-Clixml $FileToImport
+    Write-Debug ""
 
-    return $TheFile
+}
+
+Function Import-OutputIntoVariable {
+    param (
+        [Parameter(Position=1, Mandatory=$true, ParameterSetName='ImportFromFile')]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Path,
+
+        [Parameter(Position=1, Mandatory=$true, ParameterSetName='ImportFromCommand')]
+        [string]
+        $EmailAddress
+    )
+
+
 }
 
 
@@ -104,18 +118,50 @@ function Import-XMLInVariable {
 # Main script #
 ###############
 
-Write-Host "Do you have the output of the " -ForegroundColor White -NoNewline
-Write-Host "Get-MoveRequestStatistics <AffectedMailbox> -IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"" -ForegroundColor Cyan -NoNewline
-Write-Host " command in an .xml file (Y / N)? " -ForegroundColor White -NoNewline
-$ReadFromKeyboard = ""
+#Ask-ForXMLFile
 
+Write-Host "We need to analyze the output of the following command:" -ForegroundColor White
+Write-Host "`tGet-MoveRequestStatistics" -ForegroundColor Cyan -NoNewline
+Write-Host " User1@contoso.com " -ForegroundColor White -NoNewline
+Write-Host "`-IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"" -ForegroundColor Cyan
 
-#$MoveRequestStatistics = Import-Clixml C:\Temp\Doinita\dtest2.xml
+##### Need to add Data Validation for the "yes/no" answer expected!!!
+Do {
+    $ReadAnswerPoint1 = Read-Host "Do you have this in an .xml file already? (y/n)"
+    Write-Host "`r" -NoNewline
+}
+while ($ReadAnswerPoint1 -notmatch "Y|N|Yes|No")
 
-#$key = [Console]::ReadKey()
-#$char = $key.KeyChar
-#$key.KeyChar.ToString().ToUpper()
+##### Need to add Data Validation for the "path"!!!
+if ($ReadAnswerPoint1 -match "Y|Yes") {
+    Write-Host "Please provide the exact path of this file (Eg.: " -ForegroundColor White -NoNewline
+    Write-Host "`"C:\Temp\MoveRequestStatistics.xml`"" -ForegroundColor Cyan -NoNewline
+    Write-Host ")" -ForegroundColor White
+    Write-Host "`t" -NoNewline
+    $PathPoint1 = Read-Host
 
+##### Need to add Data Validation for the ".xml Import"!!!
+    $MoveRequestStatisticsToCheck = Import-Clixml $PathPoint1
+    [xml]$DiagnosticInfoToCheck = $($MoveRequestStatisticsToCheck.DiagnosticInfo)
 
-############################
+    if (($($MoveRequestStatisticsToCheck.Report)) -and ($($DiagnosticInfoToCheck.Job.TimeTracker.Durations)) -and ($($DiagnosticInfoToCheck.Job.TimeTracker.Timeline))) {
+        Write-Host "We will use the current output to analyze"
+##### Mark into the log file that the current output is good to be analyzed, as is output of Get-MoveRequestStatistics $Mailbox -IncludeReport -DiagnosticInfo "showtimeslots, showtimeline, verbose"
+##### Download the .xml/.json file, analyze the logs and provide results
+
+    }
+    else {
+        Write-Host "The current output is not of the `<Get-MoveRequestStatistics $Mailbox -IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"`> command" -ForegroundColor Red
+        Collect-EmailAddress
+    }
+
+}
+##### Need to add Data Validation for the "EmailAddress"!!!
+else {
+    Write-Host
+    Write-Host "We will continue by trying to collect the migration logs"
+    Collect-EmailAddress
+#    Write-Host "Please provide the email address of the user for which we have to do the check" -ForegroundColor Cyan -NoNewline
+#    $EmailAddress = Read-Host
+}
 
