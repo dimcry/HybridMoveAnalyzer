@@ -409,8 +409,7 @@ function DownloadTheJSonFile {
   
 }
 
-$Request = "https://github.com/dimcry/HybridMoveAnalyzer/blob/master/JSon_ErrorsAndRecommendations.json"
-Invoke-WebRequest $Request
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/dimcry/HybridMoveAnalyzer/master/JSon_ErrorsAndRecommendations.json -OutFile .\ErrorsAndRecommendations.json
 #>
 
 ###############
@@ -462,41 +461,43 @@ if (-not ($ValidationOfKey)) {
     }#>
 }
 
-Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process -Confirm:$false
-# Unblock-File .\AnalyzeMoveRequestStats.ps1
-. .\AnalyzeMoveRequestStats.ps1
+function Run-Manually {
+    Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process -Confirm:$false
+    # Unblock-File .\AnalyzeMoveRequestStats.ps1
+    . .\AnalyzeMoveRequestStats.ps1
 
-$stats = $TheMoveRequestStatistics
-ProcessStats -stats $stats -name ProcessedStats1
+    $stats = $TheMoveRequestStatistics
+    ProcessStats -stats $stats -name ProcessedStats1
 
-#DownloadTheJSonFile
+    #DownloadTheJSonFile
 
-<#
-Get-Process |
-    Select-Object -First 5 name, pm |
-    Out-PieChart -PieChartTitle "Top 5 Windows processes running" -DisplayToScreen
+    <#
+    Get-Process |
+        Select-Object -First 5 name, pm |
+        Out-PieChart -PieChartTitle "Top 5 Windows processes running" -DisplayToScreen
 
-Get-Service |
-	Group-Object -Property Status -NoElement |
-	Out-PieChart -PieChartTitle "Service Status" -Pie3D -saveImage C:\tmp\PieChart\'Service status.png'
+    Get-Service |
+        Group-Object -Property Status -NoElement |
+        Out-PieChart -PieChartTitle "Service Status" -Pie3D -saveImage C:\tmp\PieChart\'Service status.png'
 
-#>
+    #>
 
-$timeline = Build-TimeTrackerTable -MrsJob $TheMoveRequestStatistics -Aggregation Day
-$timeline | ft -AutoSize
+    $timeline = Build-TimeTrackerTable -MrsJob $TheMoveRequestStatistics -Aggregation Day
+    $timeline | ft -AutoSize
 
 
-<#
-[xml]$DiagnosticInfo = $TheMoveRequestStatistics.DiagnosticInfo
-$OutputForChart = Analyze-DiagnosticInfo -DiagnosticInfo $DiagnosticInfo
-#>
+    <#
+    [xml]$DiagnosticInfo = $TheMoveRequestStatistics.DiagnosticInfo
+    $OutputForChart = Analyze-DiagnosticInfo -DiagnosticInfo $DiagnosticInfo
+    #>
 
-#$MoveRequestStatistics = Import-Clixml C:\Temp\Doinita\dtest2.xml
+    #$MoveRequestStatistics = Import-Clixml C:\Temp\Doinita\dtest2.xml
 
-#$key = [Console]::ReadKey()
-#$char = $key.KeyChar
-#$key.KeyChar.ToString().ToUpper()
+    #$key = [Console]::ReadKey()
+    #$char = $key.KeyChar
+    #$key.KeyChar.ToString().ToUpper()
 
+}
 
 ############################
 
