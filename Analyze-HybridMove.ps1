@@ -489,14 +489,13 @@ function Run-Manually {
     <#
     [xml]$DiagnosticInfo = $TheMoveRequestStatistics.DiagnosticInfo
     $OutputForChart = Analyze-DiagnosticInfo -DiagnosticInfo $DiagnosticInfo
-    #>
 
     #$MoveRequestStatistics = Import-Clixml C:\Temp\Doinita\dtest2.xml
 
-    #$key = [Console]::ReadKey()
-    #$char = $key.KeyChar
-    #$key.KeyChar.ToString().ToUpper()
-
+    $key = [Console]::ReadKey()
+    $char = $key.KeyChar
+    $key.KeyChar.ToString().ToUpper()
+    #>
 }
 
 ############################
