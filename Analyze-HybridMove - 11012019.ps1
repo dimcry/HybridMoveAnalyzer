@@ -473,7 +473,7 @@ function Run-Manually {
 
     <#
     Get-Process |
-        Select-Object -First 50 name, pm |
+        Select-Object -First 5 name, pm |
         Out-PieChart -PieChartTitle "Top 5 Windows processes running" -DisplayToScreen
 
     Get-Service |
@@ -482,7 +482,7 @@ function Run-Manually {
 
     #>
 
-    $timeline = Build-TimeTrackerTable -MrsJob $TheMoveRequestStatistics -Aggregation Day
+    $timeline = Build-TimeTrackerTable -MrsJob $TheMoveRequestStatistics -Aggregation Month
     $timeline | ft -AutoSize
 
 
