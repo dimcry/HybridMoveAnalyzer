@@ -113,453 +113,240 @@ D.	Resource estimates:
 # Common space for functions, global variables #
 ################################################
 
-function Provide-PathOfXMLFile {
-
-    Write-Host
-    Write-Host "Please provide the exact path of the .xml file: " -ForegroundColor  Cyan
-    Write-Host "`t" -NoNewline
-    ##### Validation needed (the path)
-    [string]$PathOfTheFile = Read-Host
-
-    [bool]$ValidationOfThePath = Check-PathOrFile -PathToCheck $PathOfTheFile
-
-    if ($ValidationOfThePath) {
-        return $PathOfTheFile
-    }
-
-}
-
-function Check-PathOrFile {
-    param (
-        # Full path of the .xml file
-        [Parameter(Mandatory = $true)]
-        [string]
-        $PathToCheck
-    )
-
-    Write-Host
-    Write-Host "We are validating the path you provided..." -ForegroundColor Cyan
-    [bool]$ValidatePath = $True
-    if (!(Test-Path "$PathToCheck" -ErrorAction SilentlyContinue))
-    {
-        $ValidatePath = $False
-        Write-Host "The following is an invalid path, or, we are not able to connect to it: " -ForegroundColor Red -NoNewline
-        Write-Host " `"$PathToCheck`" " -ForegroundColor White -NoNewline
-    }
-    else {
-        Write-Host "`tPath successfully validated..." -ForegroundColor Green
-    }
-    
-    return $ValidatePath
-}
-
-function Import-XMLInVariable {
-    param (
-        # .xml file to import
-        [Parameter(Mandatory = $true)]
-        [string]
-        $FileToImport
-    )
-
-    Write-Host
-    Write-Host "We are importing the file into a PowerShell variable..." -ForegroundColor Cyan
-    [PSObject]$TheFile = Import-Clixml $FileToImport
-
-    if ($TheFile) {
-        Write-Host "`tWe successfully imported the file..." -ForegroundColor Green
-        return $TheFile
-    }
-    else {
-        Import-XMLInVariable -FileToImport $FileToImport
-    }
-}
-
-function Provide-AffectedUser {
-
-    Write-Host
-    Write-Host "Please provide the email address or UserPrincipalName of the affected user: " -ForegroundColor Cyan
-    Write-Host "`t" -NoNewline
-    ##### Validation needed (email address)
-    [string]$AffectedUser = Read-Host
-
-    return $AffectedUser
-
-}
-
-function Validate-ConnectionToExchangeOnline {
-
-    Write-Host "Checking if you are connected to Exchange Online..."
-    ##### Validation needed (PSSession)
-    [bool]$AlreadyConnectedToEXO = $true
-    $GetPsSessions = Get-PSSession -ErrorAction SilentlyContinue
-
-    foreach ($PsSession in $GetPsSessions){
-        if (($($PsSession.ComputerName).ToLower() -eq "outlook.office365.com") -and ($($PsSession.State).ToString().ToLower() -eq "opened")) {
-
-        }
-
-    }
-    
-    
-}
-
-function Connect-ToExchangeOnline {
-
-    Write-Host
-    Write-Host "We are connecting you to Exchange Online..." -ForegroundColor Cyan
-    Write-Host
-    $cred = Get-Credential
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $cred -Authentication Basic -AllowRedirection
-
-    return $Session
-    
-}
-
-function Validate-MoveRequestStatistics {
-    param (
-        # .xml file to validate
-        [Parameter(Mandatory = $true)]
-        [PSObject]
-        $MoveRequestStatisticsToValidate
-    )
- 
-    Write-Host
-    Write-Host "We are validating if the information from the file you provided can be used for further analysis..." -ForegroundColor Cyan
-    [bool]$InfoValidated = $false
-
-    [xml]$DiagnosticInfoToCheck = $($MoveRequestStatisticsToValidate.DiagnosticInfo)
-    if (($($MoveRequestStatisticsToValidate.Report)) -and ($($DiagnosticInfoToCheck.Job.TimeTracker.Durations)) -and ($($DiagnosticInfoToCheck.Job.TimeTracker.Timeline))) {
-        [bool]$InfoValidated = $true
-        Write-Host "`tThe information from the file will be used for further analysis..." -ForegroundColor Green
-    }
-    else {
-        Write-Host "`tThe information from the file will not be used for further analysis. We will use other methods to collect the information related to the move..." -ForegroundColor Red
-    }
-
-    return $InfoValidated
-}
-
-Function Out-PieChart {
+function Ask-ForXMLPath {
     [CmdletBinding()]
-    param (
-        [Parameter(ValueFromPipeline)]
-        [psobject] $inputObject,
-        [Parameter()]
-        [string] $PieChartTitle,
-        [Parameter()]
-        [int] $ChartWidth = 800,
-        [Parameter()]
-        [int] $ChartHeight = 400,
-        [Parameter()]
-        [string[]] $NameProperty,
-        [Parameter()]
-        [string] $ValueProperty,
-        [Parameter()]
-        [switch] $Pie3D,
-        [Parameter()]
-        [switch] $DisplayToScreen,
-        [Parameter()]
-        [string] $saveImage
-    )
-    begin {
-        Add-Type -AssemblyName System.Windows.Forms.DataVisualization
-        # Frame
-        $Chart = [System.Windows.Forms.DataVisualization.Charting.Chart]@{
-            Width       = $ChartWidth
-            Height      = $ChartHeight
-            BackColor   = 'White'
-            BorderColor = 'Black'
-        }
-        # Body
-        $null = $Chart.Titles.Add($PieChartTitle)
-        $Chart.Titles[0].Font = "segoeuilight,20pt"
-        $Chart.Titles[0].Alignment = "TopCenter"
-        # Create Chart Area
-        $ChartArea = [System.Windows.Forms.DataVisualization.Charting.ChartArea]::new()
-        $ChartArea.Area3DStyle.Enable3D = $Pie3D.ToBool()
-        $ChartArea.Area3DStyle.Inclination = 50
-        $Chart.ChartAreas.Add($ChartArea)
-        # Define Chart Area
-        $null = $Chart.Series.Add("Data")
-        $Chart.Series["Data"].ChartType = [System.Windows.Forms.DataVisualization.Charting.SeriesChartType]::Pie
-        # Chart style
-        $Chart.Series["Data"]["PieLabelStyle"] = "Outside"
-        $Chart.Series["Data"]["PieLineColor"] = "Black"
-        $Chart.Series["Data"]["PieDrawingStyle"] = "Concave"
-
-        $chart.Series["Data"].IsValueShownAsLabel = $true
-        $chart.series["Data"].Label = "#PERCENT\n#VALX"
-        # Set ArrayList
-        $XColumn = [System.Collections.ArrayList]::new()
-        $yColumn = [System.Collections.ArrayList]::new()
-    }
-    process {
-        if (-not $valueProperty) {
-            $numericProperties = foreach ($property in $inputObject.PSObject.Properties) {
-                if ([Double]::TryParse($property.Value, [Ref]$null)) {
-                    $property.Name
-                }
-            }
-            if (@($numericProperties).Count -eq 1) {
-                $valueProperty = $numericProperties
-            }
-            else {
-                throw 'Unable to automatically determine properties to graph'
-            }
-        }
-        if (-not $LabelProperty) {
-            if ($inputObject.PSObject.Properties.Count -eq 2) {
-                $LabelProperty = $inputObject.Properties.Name -ne $valueProperty
-            }
-            elseif ($inputObject.PSObject.Properties.Item('Name')) {
-                $LabelProperty = 'Name'
-            }
-            else {
-                throw 'Cannot convert Data'
-            }
-        }
-        # Bind chart columns
-        $null = $yColumn.Add($InputObject.$valueProperty)
-        $null = $xColumn.Add($inputObject.$LabelProperty)
-    }
-    end {
-        # Add data to chart
-        $Chart.Series["Data"].Points.DataBindXY($xColumn, $yColumn)
-        # Save file
-        if ($psboundparameters.ContainsKey('saveImage')) {
-            try{
-                if (Test-Path (Split-Path $saveImage -Parent)) {
-                    $SaveImage = $pscmdlet.GetUnresolvedProviderPathFromPSPath($saveImage)
-                    $Chart.SaveImage($saveImage, "png")
-                } else {
-                    throw 'Invalid path, the parent directory must exist'
-                }
-            } catch {
-                throw
-            }
-        }
-        # Display Chart to screen
-        if ($DisplayToScreen.ToBool()) {
-            $Form = [Windows.Forms.Form]@{
-                Width           = 800
-                Height          = 450
-                AutoSize        = $true
-                FormBorderStyle = "FixedDialog"
-                MaximizeBox     = $false
-                MinimizeBox     = $false
-                KeyPreview      = $true
-            }
-            $Form.controls.add($Chart)
-            $Chart.Anchor = 'Bottom, Right, Top, Left'
-            $Form.Add_KeyDown({
-                if ($_.KeyCode -eq "Escape") { $Form.Close() }
-            })
-            $Form.Add_Shown( {$Form.Activate()})
-            $Form.ShowDialog() | Out-Null
-        }
-    }
-}
-
-function Analyze-DiagnosticInfo {
-    param (
-        # XML of DiagnosticInfo to analyze
-        [Parameter(Mandatory = $true)]
-        [PSObject]
-        $DiagnosticInfo
-    )
-    
-
-
-}
-
-function Build-TimeTrackerTable
-{
-    <#
-        .Synopsis
-        Retrieves the set of MRS indexes in AD for jobs matching the given query.
-
-        .Parameter MrsJob
-        An object returned by Get-*RequestStatistics with detailed time-tracker data.
-		These data are obtained by passing these arguments to the cmdlet: -Diagnostic -DiagnosticArgument "showtimeline,verbose"
-
-        .Parameter Aggregation
-        Build the table from the ByMinute, ByHour, ByDay or ByMonth XML aggregations.
-    #>
-    param(
+    Param
+    (
         [Parameter(Mandatory=$true)]
-        $MrsJob,
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('Minute', 'Hour', 'Day', 'Month')]
-        [string]
-        $Aggregation = 'Hour'
+        [int]
+        $NumberOfChecks
     )
 
-    $diagnosticInfo = [xml]$MrsJob.DiagnosticInfo
-    if ($diagnosticInfo -eq $null)
-    {
-        return
+    [string]$PathOfXMLFile = ""
+    if ($NumberOfChecks -eq "1") {
+        Write-Host "Please provide the path of the .xml file: " -ForegroundColor Cyan
+        Write-Host "`t" -NoNewline
+        try {
+            $PathOfXMLFile = Validate-XMLPath -filePath (Read-Host)
+        }
+        catch {
+            $NumberOfChecks++
+            Ask-ForXMLPath -NumberOfChecks $NumberOfChecks
+        }
     }
+    else {
+        Write-Host
+        Write-Host "The path you provided is not valid!" -ForegroundColor Red
 
-	$seriesName = 'By{0}' -f $Aggregation
-    $seriesData = $diagnosticInfo.Job.TimeTracker.Timeline.$seriesName
-    if ($seriesData -eq $null -or $seriesData.$Aggregation.Count -eq 0)
-    {
-        return
-    }
+        Write-Host "Would you like to provide it again?" -ForegroundColor Cyan
+        Write-Host "`t[Y] Yes     [N] No      (default is `"N`"): " -NoNewline -ForegroundColor White
+        $ReadFromKeyboard = Read-Host
 
-    $seriesSize = $seriesData.$Aggregation.D.Count
-    $series = [System.Collections.Generic.List[object]]::new($seriesSize)
-    foreach ($hour in $seriesData.$Aggregation)
-    {
-        $startTime = $hour.StartTime -as [DateTime]
-        foreach ($entry in $hour.D)
-        {
-            $state = $entry.State
-            $duration = $entry.Duration -as [TimeSpan]
-			$msecs = $entry.MSecs -as [long]
-            $row = [PSCustomObject][Ordered]@{
-                'StartTime' = $startTime
-                'State' = $state
-                'Duration' = $duration
-				'Milliseconds' = $msecs
-				'CumulativeDuration' = $null
-				'CumulativeMilliseconds' = $null
+        [bool]$TheKey = $false
+        Switch ($ReadFromKeyboard) 
+        { 
+          Y {$TheKey=$true} 
+          N {$TheKey=$false} 
+          Default {$TheKey=$false} 
+        }
+
+        if ($TheKey) {
+            Write-Host
+            Write-Host "Please provide again the path of the .xml file: " -ForegroundColor Cyan
+            Write-Host "`t" -NoNewline
+            try {
+                $PathOfXMLFile = Validate-XMLPath -filePath (Read-Host)
             }
+            catch {
+                Write-Host "The path you provided is still not valid" -ForegroundColor Red
+                Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Red
+                $PathOfXMLFile = "ValidationOfFileFailed"
+            }
+        }
+        else {
+            Write-Host
+            Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Red
+            $PathOfXMLFile = "ValidationOfFileFailed"
+        }
+    }
+    return $PathOfXMLFile
+}
 
-            $series.Add($row)
+function Validate-XMLPath {
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Test-Path $_})]
+        [string]
+        $filePath
+    )
+
+    if (($filePath.Length -gt 4) -and ($filePath -like "*.xml")) {
+        Write-Host
+        Write-Host $filePath -ForegroundColor Cyan -NoNewline
+        Write-Host " is a valid .xml file. We will use it to continue the investigation" -ForegroundColor Green
+    }
+    else {
+        $filePath = "NotAValidPath"
+    }
+
+    return $filePath
+}
+
+function Ask-ForDetailsAboutUser {
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory=$true)]
+        [int]
+        $NumberOfChecks
+    )    
+
+    if ($NumberOfChecks -eq "1") {
+        Write-Host "Please provide the username of the affected user (Eg.: " -NoNewline -ForegroundColor Cyan
+        Write-Host "User1@contoso.com" -NoNewline -ForegroundColor White
+        Write-Host "): " -NoNewline -ForegroundColor Cyan
+        $TheUserName = Read-Host
+        $NumberOfChecks++
+    }
+    else {
+        Write-Host "Please provide again the username of the affected user (Eg.: " -NoNewline -ForegroundColor Cyan
+        Write-Host "User1@contoso.com" -NoNewline -ForegroundColor White
+        Write-Host "): " -NoNewline -ForegroundColor Cyan
+        $TheUserName = Read-Host
+    }
+
+    Write-Host
+    Write-Host "You entered " -NoNewline -ForegroundColor Cyan
+    Write-Host "$TheUserName" -NoNewline -ForegroundColor White
+    Write-Host " as being the affected user. Is this correct?" -ForegroundColor Cyan
+    Write-Host "`t[Y] Yes     [N] No      (default is `"Y`"): " -NoNewline -ForegroundColor White
+    $ReadFromKeyboard = Read-Host
+
+    [bool]$TheKey = $true
+    Switch ($ReadFromKeyboard) 
+    { 
+      Y {$TheKey=$true} 
+      N {$TheKey=$false} 
+      Default {$TheKey=$true} 
+    }
+
+    if ($TheKey) {
+        return $TheUserName
+    }
+    else {
+        [string]$TheUser = Ask-ForDetailsAboutUser -NumberOfChecks $NumberOfChecks
+        return $TheUser
+    }
+
+}
+
+function Ask-DetailsAboutMigrationType {
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory=$true)]
+        [int]
+        $NumberOfChecks,
+        [string]
+        $AffectedUser
+    )
+
+    if ($NumberOfChecks -eq "1") {
+        Write-Host "Please select the MigrationType used to migrate $AffectedUser" -ForegroundColor Cyan
+        Write-Host "`t[1] Hybrid" -ForegroundColor White
+        Write-Host "`t[2] IMAP" -ForegroundColor White
+        Write-Host "`t[3] Cutover" -ForegroundColor White
+        Write-Host "`t[4] Staged" -ForegroundColor White
+        Write-Host "Select 1, 2, 3 or 4 (default is `"1`"): " -NoNewline -ForegroundColor Cyan
+        $ReadFromKeyboard = Read-Host
+
+        Switch ($ReadFromKeyboard) 
+        { 
+          1 {$MigrationType="Hybrid"} 
+          2 {$MigrationType="IMAP"} 
+          3 {$MigrationType="Cutover"}
+          4 {$MigrationType="Staged"}
+          Default {$MigrationType="Hybrid"} 
+        }
+
+        $NumberOfChecks++
+    }
+    else {
+        Write-Host "Please select again the MigrationType used to migrate $AffectedUser" -ForegroundColor Cyan
+        Write-Host "`t[1] Hybrid" -ForegroundColor White
+        Write-Host "`t[2] IMAP" -ForegroundColor White
+        Write-Host "`t[3] Cutover" -ForegroundColor White
+        Write-Host "`t[4] Staged" -ForegroundColor White
+        Write-Host "Select 1, 2, 3 or 4 (default is `"1`"): " -NoNewline -ForegroundColor Cyan
+        $ReadFromKeyboard = Read-Host
+
+        Switch ($ReadFromKeyboard) 
+        { 
+          1 {$MigrationType="Hybrid"} 
+          2 {$MigrationType="IMAP"} 
+          3 {$MigrationType="Cutover"}
+          4 {$MigrationType="Staged"}
+          Default {$MigrationType="Hybrid"} 
         }
     }
 
-	$series = $series | sort StartTime, State
+    Write-Host
+    Write-Host "You entered " -NoNewline -ForegroundColor Cyan
+    Write-Host "$MigrationType" -NoNewline -ForegroundColor White
+    Write-Host ". Is this correct?" -ForegroundColor Cyan
+    Write-Host "`t[Y] Yes     [N] No      (default is `"Y`"): " -NoNewline -ForegroundColor White
+    $ReadFromKeyboard = Read-Host
 
-	$gSeries = $series | group -NoElement State
-	$accumulations = @{}
-	$gSeries.Name | %{ $accumulations[$_] = [TimeSpan]::Zero }
+    [bool]$TheKey = $true
+    Switch ($ReadFromKeyboard) 
+    { 
+      Y {$TheKey=$true} 
+      N {$TheKey=$false} 
+      Default {$TheKey=$true} 
+    }
 
-    $series | %{
-		$state = $_.State
-		$accumulation = $accumulations[$state]
-		$accumulation += $_.Duration
-		$accumulations[$state] = $accumulation
-		$_.CumulativeDuration = $accumulation
-		$_.CumulativeMilliseconds = $accumulation.TotalMilliseconds
-	}
-
-	$series
+    if ($TheKey) {
+        return $MigrationType
+    }
+    else {
+        [string]$AMigrationType = Ask-DetailsAboutMigrationType -NumberOfChecks $NumberOfChecks -AffectedUser $AffectedUser
+        return $AMigrationType
+    }
 }
 
 <#
-function DownloadTheJSonFile {
-
-    $WebClient = New-Object System.Net.WebClient
-    $WebClient.DownloadFile("https://github.com/dimcry/HybridMoveAnalyzer/blob/master/JSon_ErrorsAndRecommendations.json",".\ErrorsAndRecommendations.json")
-  
+function Connect-ToExchangeOnline {
+    param (
+        OptionalParameters
+    )
+    
 }
-
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/dimcry/HybridMoveAnalyzer/master/JSon_ErrorsAndRecommendations.json -OutFile .\ErrorsAndRecommendations.json
 #>
+
 
 ###############
 # Main script #
 ###############
 
 Get-PSSession | Remove-PSSession
-<#
-Write-Host "Do you have the output of the " -ForegroundColor White -NoNewline
-Write-Host "Get-MoveRequestStatistics <AffectedMailbox> -IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"" -ForegroundColor Cyan -NoNewline
-Write-Host " command in an .xml file (Y / N)? " -ForegroundColor White -NoNewline
-#>
+
 Clear-Host
-Write-Host "Do you already have the migration logs collected in an .xml format (" -NoNewline -ForegroundColor White
-Write-Host "[Y] Yes   [N] No   (default is `"N`")" -NoNewline -ForegroundColor Cyan
-Write-Host ")?: " -NoNewline -ForegroundColor White
-$ReadFromKeyboard = Read-Host
-Switch ($ReadFromKeyboard) 
-{ 
-  Y {$TheKey=$true} 
-  N {$TheKey=$false} 
-  Default {$TheKey=$false} 
+[int]$TheNumberOfChecks = 1
+[string]$ThePath = Ask-ForXMLPath -NumberOfChecks $TheNumberOfChecks
+
+if ($ThePath -match "ValidationOfFileFailed") {
+    [int]$TheNumberOfChecks = 1
+    [string]$TheUser = Ask-ForDetailsAboutUser -NumberOfChecks $TheNumberOfChecks
+    [int]$TheNumberOfChecks = 1
+    [string]$TheMigrationType = Ask-DetailsAboutMigrationType -NumberOfChecks $TheNumberOfChecks -AffectedUser $TheUser
+    #Connect-ToExchangeOnline #### Not done yet
+    #$TheMigrationLogs = Collect-MigrationLogs -UserName $TheUser -MigrationType $TheMigrationType #### Not done yet
 }
-
-
-##### Validation needed (y/n)
-[char]$ReadFromKeyboard = Read-Host
-
-[bool]$ValidationOfKey = $false
-if ($ReadFromKeyboard.ToString().ToUpper() -eq "Y") {
-    [string]$ThePathOfTheFile = Provide-PathOfXMLFile
-    [PSObject]$TheMoveRequestStatistics = Import-XMLInVariable -FileToImport $ThePathOfTheFile
-    
-    [bool]$IsValidToBeUsed = Validate-MoveRequestStatistics -MoveRequestStatisticsToValidate $TheMoveRequestStatistics
-
-    if (-not ($IsValidToBeUsed)) {
-        $BackupMoveRequestStatistics = $TheMoveRequestStatistics
-        $TheMoveRequestStatistics = New-Object PSObject
-    }
-    else {
-        $ValidationOfKey = $true
-    }
-
+else {
+    #$TheMigrationLogs = Collect-MigrationLogs  #### Not done yet
 }
-if (-not ($ValidationOfKey)) {
-    [string]$EmailAddress = Provide-AffectedUser
-    $EXOPSSession = Connect-ToExchangeOnline
-    $ImportedSession = Import-PSSession $EXOPSSession -Prefix "EXO" -AllowClobber -ErrorAction SilentlyContinue
-
-    Write-Host
-    Write-Host "We are collecting the output of " -ForegroundColor Cyan -NoNewline
-    Write-Host "`"Get-EXOMoveRequestStatistics $EmailAddress -IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"" -ForegroundColor White -NoNewline
-    Write-Host " from Exchange Online..." -ForegroundColor Cyan
-    
-    ##### Validation needed (Connected to EXO? Rights to run the command?)
-
-    $TheMoveRequestStatistics = Get-EXOMoveRequestStatistics $EmailAddress -IncludeReport -DiagnosticInfo "showtimeslots, showtimeline, verbose" -ErrorAction SilentlyContinue
-
-
-    <#if (-not ($TheMoveRequestStatistics)) {
-        # Are we still connected to Exchange Online?
-        Get-Command Get-EXOMoveRequestStatistics
-    }#>
-}
-
-function Run-Manually {
-    Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process -Confirm:$false
-    # Unblock-File .\AnalyzeMoveRequestStats.ps1
-    . .\AnalyzeMoveRequestStats.ps1
-
-    $stats = $TheMoveRequestStatistics
-    ProcessStats -stats $stats -name ProcessedStats1
-
-    #DownloadTheJSonFile
-
-    <#
-    Get-Process |
-        Select-Object -First 50 name, pm |
-        Out-PieChart -PieChartTitle "Top 5 Windows processes running" -DisplayToScreen
-
-    Get-Service |
-        Group-Object -Property Status -NoElement |
-        Out-PieChart -PieChartTitle "Service Status" -Pie3D -saveImage C:\tmp\PieChart\'Service status.png'
-
-    #>
-
-    $timeline = Build-TimeTrackerTable -MrsJob $TheMoveRequestStatistics -Aggregation Day
-    $timeline | ft -AutoSize
-
-
-    <#
-    [xml]$DiagnosticInfo = $TheMoveRequestStatistics.DiagnosticInfo
-    $OutputForChart = Analyze-DiagnosticInfo -DiagnosticInfo $DiagnosticInfo
-
-    #$MoveRequestStatistics = Import-Clixml C:\Temp\Doinita\dtest2.xml
-
-    $key = [Console]::ReadKey()
-    $char = $key.KeyChar
-    $key.KeyChar.ToString().ToUpper()
-    #>
-}
-
-############################
 
 
 ############################

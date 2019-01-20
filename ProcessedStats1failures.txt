@@ -3862,3 +3862,187 @@ Diagnostic context:
     Lid: 63664  
     Lid: 40448   StoreEc: 0x973     
 
+Dtest2: MailboxCrossSiteFailoverException: Cannot open mailbox. --> MapiExceptionMdbOffline: Unable to open message store. (hr=0x80004005, ec=1142)
+Diagnostic context:
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=324]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x476][length=210][latency=10]
+    Lid: 32881   StoreEc: 0x476     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x476     
+    Lid: 52176   ClientVersion: 15.20.1446.22
+    Lid: 50032   ServerVersion: 15.20.1446.6022
+    Lid: 50128  
+    Lid: 1494    ---- Remote Context Beg ----
+    Lid: 46904   StoreEc: 0x476     
+    Lid: 63456   dwParam: 0x81E0
+    Lid: 33248  
+    Lid: 63456   Error: 0xDA9A
+    Lid: 38714   dwParam: 0x2
+    Lid: 56872   dwParam: 0xFE
+    Lid: 42712   StoreEc: 0x476     
+    Lid: 35992   StoreEc: 0x476     
+    Lid: 50784  
+    Lid: 1750    ---- Remote Context End ----
+    Lid: 50288  
+    Lid: 23354   StoreEc: 0x476     
+    Lid: 35180  
+    Lid: 25913  
+    Lid: 21817   ROP Failure: 0x476     
+    Lid: 46042   StoreEc: 0x476     
+    Lid: 32441  
+    Lid: 1706    StoreEc: 0x476     
+    Lid: 24761  
+    Lid: 20665   StoreEc: 0x476     
+    Lid: 25785  
+    Lid: 29881   StoreEc: 0x476      TimeoutErrorTransientException: The call to 'https://owa.dimcry.ro/EWS/mrsproxy.svc' timed out. Error details: The request channel timed out attempting to send after 00:00:00. Increase the timeout value passed to the call to Request or increase the SendTimeout value on the Binding. The time allotted to this operation may have been a portion of a longer timeout. --> The HTTP request to 'https://owa.dimcry.ro/EWS/mrsproxy.svc' has exceeded the allotted timeout of 00:00:00. The time allotted to this operation may have been a portion of a longer timeout. --> The request channel timed out attempting to send after 00:00:00. Increase the timeout value passed to the call to Request or increase the SendTimeout value on the Binding. The time allotted to this operation may have been a portion of a longer timeout. --> The HTTP request to 'https://owa.dimcry.ro/EWS/mrsproxy.svc' has exceeded the allotted timeout of 00:00:00. The time allotted to this operation may have been a portion of a longer timeout. StorageTransientException: Could not create folder MailboxReplicationService SyncStates. --> MapiExceptionRpcServerTooBusy: Unable to create folder. (hr=0x80004005, ec=2419)
+Diagnostic context:
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 52788  
+    Lid: 55847   EMSMDBPOOL.EcPoolSessionDoRpc called [length=244]
+    Lid: 43559   EMSMDBPOOL.EcPoolSessionDoRpc returned [ec=0x97F][length=178][latency=1000]
+    Lid: 32881   StoreEc: 0x97F     
+    Lid: 50035  
+    Lid: 64625   StoreEc: 0x97F     
+    Lid: 63028  
+    Lid: 52176   ClientVersion: 15.20.1446.22
+    Lid: 50032   ServerVersion: 15.20.1446.6022
+    Lid: 50128  
+    Lid: 1494    ---- Remote Context Beg ----
+    Lid: 48506   StoreEc: 0x80040401
+    Lid: 32796   StoreEc: 0x80040401
+    Lid: 43632   StoreEc: 0x80040401
+    Lid: 61692   StoreEc: 0x80040401
+    Lid: 34356   StoreEc: 0x97F     
+    Lid: 1750    ---- Remote Context End ----
+    Lid: 50288  
+    Lid: 23354   StoreEc: 0x973     
+    Lid: 35180  
+    Lid: 25913  
+    Lid: 21817   ROP Failure: 0x973     
+    Lid: 35312   dwParam: 0x56
+    Lid: 51696   StoreEc: 0x973     
+    Lid: 18321  
+    Lid: 30609   StoreEc: 0x973     
+    Lid: 29073  
+    Lid: 20369   StoreEc: 0x973     
+    Lid: 63664  
+    Lid: 40448   StoreEc: 0x973     
+

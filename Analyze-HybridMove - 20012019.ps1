@@ -62,9 +62,154 @@ The logic:
 12. END
 #>
 
+<#
+A.	Necessary modules:
+    1.	Collect the migration logs (related to one or multiple affected mailboxes):
+        a.	From an existing .xml file;
+        b.	From Exchange Online, by using the correct command:
+            i.      For Hybrid;
+            ii.     For IMAP;
+            iii.    For Cutover / Staged.
+
+        c.	From Get-MailboxStatistics output, if we speak about Remote moves (Hybrid), in case customer already removed the MoveRequest:
+            i.	From Exchange Online, if we speak about an Onboarding;
+            ii.	From Exchange On-Premises, if we speak about an Offboarding.
+
+    2.	Download the JSON file from GitHub, and, based on the error received, based on the Migration type, we will provide recommendation about the actions that they can take to solve the issue.
+
+B.	Good to have modules:
+    1.	Performance analyzer. Similar to what Karahan provided in his script;
+    2.	DiagnosticInfo analyzer.
+        a.	Using Build-TimeTrackerTable function from Angus’s module, I’ll parse the DiagnosticInfo details, and provide some information to customer.
+        b.	Using the idea described here, I’ll create a function that will provide a Column/Bar Chart similar to (this is screen shot provided by Angus long time ago, from a Pivot Table created in Excel, based on some information created with the above mentioned function):
+
+            EURPRD10> $timeline = Build-TimeTrackerTable -MrsJob $stat
+            EURPRD10> $timeline | Export-Csv 'tmp.csv'
+
+
+C.	Priority of modules:
+    Should be present in Version 1:     A.1., A.2., B.2.a.
+    Can be introduced in Version 2.:    B.1., B.2.b.
+
+
+D.	Resource estimates:
+
+    From time perspective:
+        Task name   Working hours   Expected completion time
+        A.1.        24              31.01.2019
+        A.2.        24              15.02.2019
+        B.1.        112             30.04.2019
+        B.2.a.      8               28.02.2019
+        B.2.b.      112             31.05.2019
+
+
+    From people perspective:
+        For the moment I’ll do everything on my own.
+        I asked pieces of advice from Brad Hughes, who guided me on the right direction (what type of the file should we use, how to download the JSON file from GitHub).
+        If you can find any other resource that can help on any of the mentioned modules, I’ll be more than happy to add them into the “team” 😊
+#>
+
 ################################################
 # Common space for functions, global variables #
 ################################################
+
+function Ask-ForXMLPath {
+    Param
+    (
+        [Parameter(Mandatory=$true)]
+        [int]
+        $NumberOfChecks
+    )
+
+    [string]$PathOfXMLFile = ""
+    if ($NumberOfChecks -eq "1") {
+        Write-Host "Please provide the path of the .xml file: " -ForegroundColor Cyan
+        Write-Host "`t" -NoNewline
+        try {
+            $PathOfXMLFile = Validate-XMLPath -filePath (Read-Host)
+        }
+        catch {
+            $NumberOfChecks++
+            Ask-ForXMLPath -NumberOfChecks $NumberOfChecks
+        }
+    }
+    else {
+        Write-Host
+        Write-Host "The path you provided is not valid!" -ForegroundColor Red
+
+        Write-Host "Would you like to provide it again?" -ForegroundColor Cyan
+        Write-Host "`t[Y] Yes     [N] No      (default is `"N`"): " -NoNewline -ForegroundColor White
+        $ReadFromKeyboard = Read-Host
+
+        [bool]$TheKey = $false
+        Switch ($ReadFromKeyboard) 
+        { 
+          Y {$TheKey=$true} 
+          N {$TheKey=$false} 
+          Default {$TheKey=$false} 
+        }
+
+        if ($TheKey) {
+            Write-Host
+            Write-Host "Please provide again the path of the .xml file: " -ForegroundColor Cyan
+            Write-Host "`t" -NoNewline
+            try {
+                $PathOfXMLFile = Validate-XMLPath -filePath (Read-Host)
+            }
+            catch {
+                Write-Host "The path you provided is still not valid" -ForegroundColor Red
+                Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Red
+                $PathOfXMLFile = "ValidationOfFileFailed"
+            }
+        }
+        else {
+            Write-Host
+            Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Red
+            $PathOfXMLFile = "ValidationOfFileFailed"
+        }
+    }
+    return $PathOfXMLFile
+}
+
+function Validate-XMLPath {
+    Param
+    (
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Test-Path $_})]
+        [string]
+        $filePath
+    )
+
+    if (($filePath.Length -gt 4) -and ($filePath -like "*.xml")) {
+        Write-Host
+        Write-Host $filePath -ForegroundColor Cyan -NoNewline
+        Write-Host " is a valid .xml file. We will use it to continue the investigation" -ForegroundColor Green
+    }
+    else {
+        $filePath = "NotAValidPath"
+    }
+
+    return $filePath
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function Provide-PathOfXMLFile {
 
@@ -412,15 +557,44 @@ function DownloadTheJSonFile {
 Invoke-WebRequest -Uri https://raw.githubusercontent.com/dimcry/HybridMoveAnalyzer/master/JSon_ErrorsAndRecommendations.json -OutFile .\ErrorsAndRecommendations.json
 #>
 
+<#
+Dynamic param:
+https://foxdeploy.com/2017/01/13/adding-tab-completion-to-your-powershell-functions/
+https://github.com/1RedOne/BlogPosts/blob/master/Restart-RemoteService.ps1
+#>
+
 ###############
 # Main script #
 ###############
 
 Get-PSSession | Remove-PSSession
 
-Write-Host "Do you have the output of the " -ForegroundColor White -NoNewline
-Write-Host "Get-MoveRequestStatistics <AffectedMailbox> -IncludeReport -DiagnosticInfo `"showtimeslots, showtimeline, verbose`"" -ForegroundColor Cyan -NoNewline
-Write-Host " command in an .xml file (Y / N)? " -ForegroundColor White -NoNewline
+Clear-Host
+Write-Host "Do you already have the migration logs collected in an .xml format?" -ForegroundColor Cyan
+Write-Host "`t[Y] Yes     [N] No      (default is `"N`"): " -NoNewline -ForegroundColor White
+$ReadFromKeyboard = Read-Host
+
+[bool]$TheKey = $false
+Switch ($ReadFromKeyboard) 
+{ 
+  Y {$TheKey=$true} 
+  N {$TheKey=$false} 
+  Default {$TheKey=$false} 
+}
+
+if ($TheKey) {
+    [string]$ThePathOfTheFile = Provide-PathOfXMLFile
+    [PSObject]$TheMoveRequestStatistics = Import-XMLInVariable -FileToImport $ThePathOfTheFile
+
+    [bool]$IsValidToBeUsed = Validate-MoveRequestStatistics -MoveRequestStatisticsToValidate $TheMoveRequestStatistics
+
+}
+else {
+    Connect-ToExchangeOnline
+}
+
+
+
 ##### Validation needed (y/n)
 [char]$ReadFromKeyboard = Read-Host
 
@@ -473,7 +647,7 @@ function Run-Manually {
 
     <#
     Get-Process |
-        Select-Object -First 5 name, pm |
+        Select-Object -First 50 name, pm |
         Out-PieChart -PieChartTitle "Top 5 Windows processes running" -DisplayToScreen
 
     Get-Service |
