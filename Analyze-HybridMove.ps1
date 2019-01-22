@@ -165,7 +165,7 @@ function Ask-ForXMLPath {
         }
         else {
             Write-Host
-            Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Red
+            Write-Host "We will continue to collect the migration logs using other methods" -ForegroundColor Yellow
             $PathOfXMLFile = "ValidationOfFileFailed"
         }
     }
@@ -203,7 +203,9 @@ function Ask-ForDetailsAboutUser {
         $NumberOfChecks
     )    
 
+    Write-Host
     if ($NumberOfChecks -eq "1") {
+        
         Write-Host "Please provide the username of the affected user (Eg.: " -NoNewline -ForegroundColor Cyan
         Write-Host "User1@contoso.com" -NoNewline -ForegroundColor White
         Write-Host "): " -NoNewline -ForegroundColor Cyan
@@ -217,7 +219,7 @@ function Ask-ForDetailsAboutUser {
         $TheUserName = Read-Host
     }
 
-    Write-Host
+    Clear-Host
     Write-Host "You entered " -NoNewline -ForegroundColor Cyan
     Write-Host "$TheUserName" -NoNewline -ForegroundColor White
     Write-Host " as being the affected user. Is this correct?" -ForegroundColor Cyan
@@ -253,8 +255,12 @@ function Ask-DetailsAboutMigrationType {
         $AffectedUser
     )
 
+    Clear-Host
     if ($NumberOfChecks -eq "1") {
-        Write-Host "Please select the MigrationType used to migrate $AffectedUser" -ForegroundColor Cyan
+        Write-Host "Please select the " -NoNewline -ForegroundColor Cyan
+        Write-Host "Migration Type" -NoNewline -ForegroundColor White
+        Write-Host " used to migrate " -NoNewline -ForegroundColor Cyan
+        Write-Host "$AffectedUser" -ForegroundColor White
         Write-Host "`t[1] Hybrid" -ForegroundColor White
         Write-Host "`t[2] IMAP" -ForegroundColor White
         Write-Host "`t[3] Cutover" -ForegroundColor White
@@ -274,12 +280,15 @@ function Ask-DetailsAboutMigrationType {
         $NumberOfChecks++
     }
     else {
-        Write-Host "Please select again the MigrationType used to migrate $AffectedUser" -ForegroundColor Cyan
+        Write-Host "Please select again the " -NoNewline -ForegroundColor Cyan
+        Write-Host "Migration Type" -NoNewline -ForegroundColor White
+        Write-Host " used to migrate " -NoNewline -ForegroundColor Cyan
+        Write-Host "$AffectedUser" -ForegroundColor White
         Write-Host "`t[1] Hybrid" -ForegroundColor White
         Write-Host "`t[2] IMAP" -ForegroundColor White
         Write-Host "`t[3] Cutover" -ForegroundColor White
         Write-Host "`t[4] Staged" -ForegroundColor White
-        Write-Host "Select 1, 2, 3 or 4 (default is `"1`"): " -NoNewline -ForegroundColor Cyan
+        Write-Host "Type 1, 2, 3 or 4 (default is `"1`"): " -NoNewline -ForegroundColor Cyan
         $ReadFromKeyboard = Read-Host
 
         Switch ($ReadFromKeyboard) 
@@ -292,7 +301,7 @@ function Ask-DetailsAboutMigrationType {
         }
     }
 
-    Write-Host
+    Clear-Host
     Write-Host "You entered " -NoNewline -ForegroundColor Cyan
     Write-Host "$MigrationType" -NoNewline -ForegroundColor White
     Write-Host ". Is this correct?" -ForegroundColor Cyan
@@ -315,15 +324,19 @@ function Ask-DetailsAboutMigrationType {
         return $AMigrationType
     }
 }
-
-<#
 function Connect-ToExchangeOnline {
-    param (
-        OptionalParameters
-    )
+
+    Clear-Host
+    Write-Host "We are connecting you to Exchange Online..." -ForegroundColor Cyan
+    Write-Host
+
+    Write-Host "We will need credentials of an Admin in order to collect the correct migration logs related "
+    $cred = Get-Credential
+    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $cred -Authentication Basic -AllowRedirection
+
+    return $Session
     
 }
-#>
 
 
 ###############
@@ -341,7 +354,7 @@ if ($ThePath -match "ValidationOfFileFailed") {
     [string]$TheUser = Ask-ForDetailsAboutUser -NumberOfChecks $TheNumberOfChecks
     [int]$TheNumberOfChecks = 1
     [string]$TheMigrationType = Ask-DetailsAboutMigrationType -NumberOfChecks $TheNumberOfChecks -AffectedUser $TheUser
-    #Connect-ToExchangeOnline #### Not done yet
+    $ThePSSession = Connect-ToExchangeOnline #### Not done yet
     #$TheMigrationLogs = Collect-MigrationLogs -UserName $TheUser -MigrationType $TheMigrationType #### Not done yet
 }
 else {
